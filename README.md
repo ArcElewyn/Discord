@@ -1,42 +1,42 @@
 # RTF Discord Bot - Personal Best Tracker
 
-Un bot Discord pour tracker les Personal Best (PB) de votre guilde sur différents boss avec système de clans et gestion des difficultés.
+A Discord Bot to track Personal Best (PB) for each clan boss  
 
-## 🎮 Fonctionnalités
+## 🎮 Features
 
-- **Multi-Boss Support** : Hydra (4 difficultés), Chimera (6 difficultés), Clan vs Clan
-- **Système de Clans** : RTF, RTFC, RTFR avec classements séparés
-- **Screenshots automatiques** : Stockage et affichage des preuves
-- **Base de données SQLite** : Stockage persistant et performant
-- **Suppression automatique** : Anciens screenshots supprimés lors de nouveaux records
-- **Interface intuitive** : Commandes simples et embeds Discord
+- **Multi-Boss Support** : Hydra (4 difficulties), Chimera (6 difficulties), Clan vs Clan
+- **Cluster support** : RTF, RTFC, RTFR with split leaderboards
+- **Saves Screenshots** : Storage and display of proof 
+- **SQLite Databse** : Persistent and efficient storage
+- **Automatic Cleanupe** : Old screenshots deleted when new records are set
+- **User-Friendly Interface** : Simple commands and Discord embeds
 
-## 📋 Prérequis
+## 📋 Requirements
 
-### Logiciels requis
+### Softwares required
 - **Python 3.9+**
-- **Container Station** (QNAP) ou **Docker**
+- **Container Station** (QNAP) or **Docker**
 - **Discord Bot Token** ([Discord Developer Portal](https://discord.com/developers/applications))
 
-### Dépendances Python
+### Python dependencies
 ```
 discord.py>=2.3.0
 aiohttp>=3.8.0
 ```
 
-## 🏗️ Structure des dossiers sur le NAS
+## 🏗️Nas Folder Structure
 
-Créez cette structure sur votre QNAP :
+Create the following structure on your QNAP:
 
 ```
 /share/Container/discord-bot/
-├── bot.py                          # Script principal du bot
-├── requirements.txt                # Dépendances Python
-├── .env                           # Variables d'environnement
-├── docker-compose.yml             # Configuration Docker
-├── bot_data.db                    # Base SQLite (créée automatiquement)
-├── logs/                          # Logs du bot (optionnel)
-└── screenshots/                   # Screenshots des PB
+├── bot.py                          # Main bot script
+├── requirements.txt                # Python dependencies
+├── .env                            # Environment variables
+├── docker-compose.yml              # Docker configuration
+├── bot_data.db                     # SQLite database (auto-created)
+├── logs/                           # Bot logs (optional)
+└── screenshots/                    # PB screenshots
     ├── hydra/
     │   ├── normal/
     │   ├── hard/
@@ -52,51 +52,51 @@ Créez cette structure sur votre QNAP :
     └── cvc/
 ```
 
-## 🐳 Installation Docker (Recommandée)
+## 🐳 Docker Installation (Recommended)
 
-### 1. Créer le fichier `requirements.txt`
+### 1. Create `requirements.txt`
 ```txt
 discord.py>=2.3.0
 aiohttp>=3.8.0
 python-dotenv>=1.0.0
 ```
 
-### 2. Créer le fichier `.env`
+### 2. Create  `.env`
 ```env
 DISCORD_TOKEN=your_bot_token_here
 AUTHORIZED_CHANNEL_ID=your_channel_id_here
 ```
 
-### 3. Créer le `Dockerfile`
+### 3. Create `Dockerfile`
 ```dockerfile
 FROM python:3.9-slim
 
 WORKDIR /app
 
-# Installer les dépendances système
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copier les fichiers de configuration
+# Copy dependency file
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le code source
+# Copy source code
 COPY bot.py .
 
-# Créer les dossiers nécessaires
+# Create required folders
 RUN mkdir -p screenshots/hydra/normal screenshots/hydra/hard screenshots/hydra/brutal screenshots/hydra/nightmare \
     screenshots/chimera/easy screenshots/chimera/normal screenshots/chimera/hard screenshots/chimera/brutal screenshots/chimera/nightmare screenshots/chimera/ultra \
     screenshots/cvc
 
-# Variables d'environnement
+# Environment variables
 ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "bot.py"]
 ```
 
-### 4. Créer le `docker-compose.yml`
+### 4. Create `docker-compose.yml`
 ```yaml
 version: '3.8'
 
@@ -114,7 +114,7 @@ services:
       - TZ=Europe/Paris
     container_name: rtf-discord-bot
     
-    # Optionnel: Limits des ressources
+    # Optional: Resource limits
     deploy:
       resources:
         limits:
@@ -125,23 +125,32 @@ services:
 
 ## ⚙️ Configuration
 
-### 1. Obtenir le Token Discord
-1. Aller sur [Discord Developer Portal](https://discord.com/developers/applications)
-2. Créer une nouvelle Application
-3. Dans "Bot" → "Token" → Copier le token
-4. Dans "Bot" → "Privileged Gateway Intents" → Activer "Message Content Intent"
+1. Get Discord Token
+Go to Discord Developer Portal (https://discord.com/developers/applications)
 
-### 2. Obtenir l'ID du Channel
-1. Dans Discord, activer le Mode Développeur (Paramètres → Avancé)
-2. Clic droit sur votre channel → "Copier l'identifiant"
+Create a new Application
 
-### 3. Inviter le bot sur votre serveur
-Générez une URL d'invitation avec ces permissions :
-- Send Messages
-- Read Message History
-- Attach Files
-- Use External Emojis
-- Add Reactions
+In "Bot" → "Token" → Copy token
+
+In "Bot" → "Privileged Gateway Intents" → Enable "Message Content Intent"
+
+2. Get Channel ID
+Enable Developer Mode in Discord (Settings → Advanced)
+
+Right-click your channel → "Copy ID"
+
+3. Invite the Bot to Your Server
+Generate an invitation URL with these permissions:
+
+Send Messages
+
+Read Message History
+
+Attach Files
+
+Use External Emojis
+
+Add Reactions
 
 URL : `https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=378944&scope=bot`
 
@@ -149,43 +158,43 @@ URL : `https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permission
 
 ### Via Container Station (Recommandé)
 
-1. **Installer Container Station** via App Center
-2. **Créer le dossier** `/share/Container/discord-bot/`
-3. **Copier tous les fichiers** dans ce dossier
-4. **Modifier le fichier `.env`** avec vos tokens
-5. **Container Station** → "Create" → "Create Application via docker-compose"
-6. **Sélectionner** votre `docker-compose.yml`
-7. **Démarrer** le container
+1. Install Container Station via App Center
+2. Create /share/Container/discord-bot/
+3. Copy all files into this folder
+4. Edit .env with your tokens
+5. Container Station → "Create" → "Create Application via docker-compose"
+6. Select your docker-compose.yml
+7. Start the container
 
 ### Via SSH (Alternative)
 
 ```bash
-# Se connecter au QNAP
-ssh admin@IP_DE_VOTRE_QNAP
+# Connect to QNAP
+ssh admin@YOUR_QNAP_IP
 
-# Naviguer vers le dossier
+# Navigate to folder
 cd /share/Container/discord-bot/
 
-# Installer les dépendances (si Python est installé)
+# Install dependencies (if Python is installed)
 pip3 install -r requirements.txt
 
-# Lancer le bot (test)
+# Test run
 python3 bot.py
 
-# Créer un service auto-start
-# Via Interface QNAP : Panneau de contrôle → Applications → Autorun
-# Ajouter : cd /share/Container/discord-bot && python3 bot.py &
+# Create auto-start service via QNAP interface
+# Control Panel → Applications → Autorun
+# Add: cd /share/Container/discord-bot && python3 bot.py &
 ```
 
-## 📊 Base de données SQLite
+## 📊 SQLite Database
 
-### Structure automatique
-Le bot crée automatiquement les tables nécessaires :
+**Automatic Structure**
+The bot automatically creates the necessary tables:
+ 
+- Table users: PBs for all bosses and difficulties
+- Table pb_history: Complete record history
 
-- **Table `users`** : PB de tous les boss et difficultés
-- **Table `pb_history`** : Historique complet des records
-
-### Colonnes principales
+### Main columns
 ```sql
 -- Hydra
 pb_hydra_normal, pb_hydra_normal_screenshot, pb_hydra_normal_date
@@ -193,7 +202,7 @@ pb_hydra_hard, pb_hydra_hard_screenshot, pb_hydra_hard_date
 pb_hydra_brutal, pb_hydra_brutal_screenshot, pb_hydra_brutal_date
 pb_hydra_nightmare, pb_hydra_nightmare_screenshot, pb_hydra_nightmare_date
 
--- Chimera (6 difficultés similaires)
+-- Chimera (6 similar difficulties)
 pb_chimera_easy, pb_chimera_normal, pb_chimera_hard, 
 pb_chimera_brutal, pb_chimera_nightmare, pb_chimera_ultra
 
@@ -201,27 +210,27 @@ pb_chimera_brutal, pb_chimera_nightmare, pb_chimera_ultra
 pb_cvc, pb_cvc_screenshot, pb_cvc_date
 ```
 
-## 🎯 Utilisation des commandes
+## 🎯 Commands Usage
 
-### Soumettre un PB
+### Submit a PB
 ```
-!pbhydra brutal 1500000    (+ screenshot attachée)
-!pbchimera ultra 2000000   (+ screenshot attachée)
-!pbcvc 1800000             (+ screenshot attachée)
-```
-
-### Voir des PB
-```
-!pbhydra nightmare         (votre PB)
-!pbchimera easy Alice      (PB d'Alice)
-!mystats                   (tous vos PB)
+!pbhydra brutal 1500000    (+ attached screenshot)
+!pbchimera ultra 2000000   (+ attached screenshot)
+!pbcvc 1800000             (+ attached screenshot)
 ```
 
-### Classements
+### View PBs
+```
+!pbhydra nightmare         (your PB)
+!pbchimera easy Alice      (Alice's PB)
+!mystats                   (all your PBs)
+```
+
+### Leaderboards
 ```
 !top10hydra brutal         (global)
-!rtfhydra nightmare        (clan RTF)
-!rtfcchimera ultra         (clan RTFC)
+!rtfhydra nightmare        (for RTF)
+!rtfcchimera ultra         (for RTFC)
 ```
 
 ## 🔧 Maintenance
@@ -232,67 +241,66 @@ pb_cvc, pb_cvc_screenshot, pb_cvc_date
 docker logs rtf-discord-bot
 
 # Via Container Station
-Container Station → Votre container → Logs
+Container Station → Your container → Logs
 ```
 
-### Sauvegarde
+### Backup
 ```bash
-# Sauvegarder la base de données
+# Backup database
 cp bot_data.db bot_data_backup_$(date +%Y%m%d).db
 
-# Sauvegarder les screenshots
+# Backup screenshots
 tar -czf screenshots_backup_$(date +%Y%m%d).tar.gz screenshots/
+
 ```
 
-### Nettoyage
-Les anciens screenshots sont **automatiquement supprimés** quand un nouveau PB est établi.
+### Cleanup
+Old screenshots are automatically deleted when a new PB is set.
 
-## 🛠️ Résolution de problèmes
+## 🛠️ Troubleshooting
 
-### Le bot ne répond pas
-- Vérifier que le `AUTHORIZED_CHANNEL_ID` est correct
-- Vérifier que le bot a les bonnes permissions
-- Consulter les logs pour les erreurs
+### Bot not responding
+- Check AUTHORIZED_CHANNEL_ID
+- Check bot permissions
+- Consult logs for errors
 
-### Screenshots non sauvegardées
-- Vérifier les permissions du dossier `screenshots/`
-- S'assurer que l'image est dans un format supporté (PNG, JPG, etc.)
+### Screenshots Not Saved
+- Check screenshots/ folder permissions
+- Ensure image format is supported (PNG, JPG, etc.)
 
-### Erreurs de base de données
-- Vérifier les permissions en écriture sur `bot_data.db`
-- En cas de corruption : supprimer le fichier (il sera recréé)
+### Database errors
+- Check write permissions on bot_data.db
+- If corrupted: delete the file (it will be recreated)
 
-## 📈 Performances
+## 📈 Performance
 
-### Optimisation pour 50+ utilisateurs
-- **SQLite** : Parfait jusqu'à 100+ utilisateurs simultanés
-- **Screenshots** : ~2MB par image, nettoyage automatique
-- **RAM** : ~128MB en utilisation normale
-- **CPU** : Minimal (événements Discord uniquement)
+### Optimized for 50+ Users
+- SQLite: Works well up to 100+ concurrent users
+- Screenshots: ~2MB per image, auto cleanup
+- RAM: ~128MB normal usage
+- CPU: Minimal (Discord events only)
 
-## 🔒 Sécurité
+## 🔒 Security
 
-- Token Discord dans `.env` (jamais dans le code)
-- Bot limité à un seul channel
-- Pas d'accès SSH ou système depuis le bot
-- Screenshots stockées localement (contrôle total)
+- Discord token in .env (never in code)
+- Bot limited to a single channel
+- No SSH or system access from bot
+- Screenshots stored locally (full control)
 
-## 📝 Notes importantes
+## 📝 Important Notes
 
-1. **Clans détectés automatiquement** : `[RTF] Username` ou `[RTF]Username`
-2. **Anciens screenshots supprimés** automatiquement lors de nouveaux PB
-3. **Classements vides** affichent un message informatif
-4. **Format des dates** : MM/DD/YYYY at HH:MM AM/PM
-5. **Émojis modifiables** dans `BOSS_CONFIG` et `CLAN_CONFIG`
+- Clans detected automatically: [RTF] Username or [RTF]Username
+- Old screenshots deleted automatically on new PB
+- Empty leaderboards show an informative message
+- Date format: MM/DD/YYYY at HH:MM AM/PM
+- Emojis editable in BOSS_CONFIG and CLAN_CONFIG
 
-## 🚀 Extensions possibles
-
-- Ajout de nouveaux boss
-- Statistiques avancées (moyennes, progressions)
-- Export des données en Excel
-- Interface web pour visualiser les stats
-- Notifications automatiques de nouveaux records
-
+## 🚀 Possible Extensions
+- Add new bosses
+- Advanced statistics (averages, progression)
+- Export data to Excel
+- Web interface to view stats
+- Automatic notifications for new records
 ---
 
-**Développé pour la communauté RTF** 🎮
+**Developed for the RTF community By Elewyn** 🎮
