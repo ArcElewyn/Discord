@@ -47,6 +47,7 @@ COMMANDS DOCUMENTATION:
 -----------------
 !mystats                    → Show all your PBs across all bosses
 !mystats <username>         → Show all PBs for specified user
+!help                       → Show user-friendly command list
 
 💡 USAGE EXAMPLES:
 -----------------
@@ -639,6 +640,87 @@ async def mystats(ctx, target_user: str = None):
         
     except Exception as e:
         await ctx.send(f"❌ Error: {e}")
+
+@bot.command()
+async def help(ctx):
+    """Affiche la liste des commandes disponibles - Notice utilisateur"""
+    if ctx.channel.id != AUTHORIZED_CHANNEL_ID:
+        return
+    
+    embed = discord.Embed(
+        title="🤖 RTF Bot - Commands Help",
+        description="Here are all available commands for tracking your Personal Bests!",
+        color=0x00bfff
+    )
+    
+    # Commandes PB
+    embed.add_field(
+        name="📊 Personal Best Commands",
+        value="`!pbhydra` `!pbchimera` `!pbcvc`\n" +
+              "• Use alone to see your PB\n" +
+              "• Add username to see someone else's PB\n" +
+              "• Add damage + screenshot to submit new PB",
+        inline=False
+    )
+    
+    # Classements globaux
+    embed.add_field(
+        name="🌍 Global Leaderboards",
+        value="`!top10hydra` `!top10chimera` `!top10cvc`\n" +
+              "Shows top 10 records across all clans",
+        inline=False
+    )
+    
+    # Classements par clan
+    embed.add_field(
+        name="⭐ RTF Clan Rankings",
+        value="`!rtfhydra` `!rtfchimera` `!rtfcvc`",
+        inline=True
+    )
+    
+    embed.add_field(
+        name="🔥 RTFC Clan Rankings", 
+        value="`!rtfchydra` `!rtfcchimera` `!rtfccvc`",
+        inline=True
+    )
+    
+    embed.add_field(
+        name="⚡ RTFR Clan Rankings",
+        value="`!rtfrhydra` `!rtfrchimera` `!rtfrcvc`",
+        inline=True
+    )
+    
+    # Stats et aide
+    embed.add_field(
+        name="📈 Stats & Info",
+        value="`!mystats` - View all your PBs\n" +
+              "`!mystats <username>` - View someone's PBs\n" +
+              "`!help` - Show this help message",
+        inline=False
+    )
+    
+    # Instructions
+    embed.add_field(
+        name="💡 How to Submit a PB",
+        value="1. Type `!pbhydra <damage>` (example: `!pbhydra 1500000`)\n" +
+              "2. **Attach a screenshot** to your message\n" +
+              "3. Bot will automatically save if it's a new record!",
+        inline=False
+    )
+    
+    # Note sur les clans
+    embed.add_field(
+        name="🏛️ Clan Detection",
+        value="Your clan is auto-detected from your username:\n" +
+              "• RTF: `[RTF]Name` or `RTFName`\n" +
+              "• RTFC: `[RTFC]Name` or `RTFCName`\n" +
+              "• RTFR: `[RTFR]Name` or `RTFRName`",
+        inline=False
+    )
+    
+    embed.set_footer(text="🎮 Good luck with your records!")
+    
+    await ctx.send(embed=embed)
 
 # TODO: Add your bot token here
 # bot.run("YOUR_DISCORD_TOKEN")
