@@ -451,7 +451,7 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
             elif arg1:  # Username
                 await show_user_pb(ctx, boss_type, None, arg1)
             else:  # Montrer son propre PB
-                await show_user_pb(ctx, boss_type, None, ctx.author.name)
+                await show_user_pb(ctx, boss_type, None, ctx.author.display_name)
             return
         
         # Pour Hydra et Chimera (avec difficultés)
@@ -481,7 +481,7 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
                 await show_user_pb(ctx, boss_type, difficulty, arg2)
             else:
                 # !pbhydra normal - Voir son propre PB
-                await show_user_pb(ctx, boss_type, difficulty, ctx.author.name)
+                await show_user_pb(ctx, boss_type, difficulty, ctx.author.display_name)
         else:
             # arg1 n'est pas une difficulté valide
             difficulty_list = " | ".join([d.title() for d in difficulties])
@@ -506,7 +506,7 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
         await ctx.send("❌ Please attach a valid image file!")
         return
     
-    username = ctx.author.name
+    username = ctx.author.display_name
     current_pb, _, _ = db_manager.get_user_pb(username, boss_type, difficulty)
     
     if damage > current_pb:
@@ -772,7 +772,7 @@ async def mystats(ctx, target_user: str = None):
         return
     
     try:
-        username = target_user if target_user else ctx.author.name
+        username = target_user if target_user else ctx.author.display_name
         user_data = db_manager.get_user_all_pbs(username)
         
         if not user_data:
