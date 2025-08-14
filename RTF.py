@@ -58,7 +58,7 @@ CVC (unchanged):
 -----------------
 !mystats                         → Show all your PBs across all bosses and difficulties
 !mystats <username>              → Show all PBs for specified user
-!help                            → Show user-friendly command list
+!guide                            → Show user-friendly command list
 
 💡 USAGE EXAMPLES:
 -----------------
@@ -841,13 +841,13 @@ async def mystats(ctx, target_user: str = None):
         await ctx.send(f"❌ Error: {e}")
 
 @bot.command()
-async def help(ctx):
+async def guide(ctx):
     """Affiche la liste des commandes disponibles avec les nouvelles difficultés"""
     if ctx.channel.id != AUTHORIZED_CHANNEL_ID:
         return
     
     embed = discord.Embed(
-        title="🤖 RTF Bot - Commands Help",
+        title="🤖 RTF Bot - Commands Guide",
         description="Here are all available commands for tracking your Personal Bests!",
         color=0x00bfff
     )
@@ -904,7 +904,7 @@ async def help(ctx):
         name="📈 Stats & Info",
         value="`!mystats` - View all your PBs\n" +
               "`!mystats <username>` - View someone's PBs\n" +
-              "`!help` - Show this help message",
+              "`!guide` - Show this help message",
         inline=False
     )
     
