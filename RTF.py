@@ -1,92 +1,10 @@
-"""
-DISCORD BOT - Personal Best Tracker with Multiple Boss Difficulties
-==================================================================
-
-COMMANDS DOCUMENTATION:
-=====================
-
-📊 PERSONAL BEST COMMANDS:
---------------------------
-HYDRA:
-!pbhydra normal <damage>         → Submit Normal Hydra PB (requires screenshot)
-!pbhydra hard <damage>           → Submit Hard Hydra PB (requires screenshot)  
-!pbhydra brutal <damage>         → Submit Brutal Hydra PB (requires screenshot)
-!pbhydra nightmare <damage>      → Submit Nightmare Hydra PB (requires screenshot)
-!pbhydra normal                  → Show your Normal Hydra PB + screenshot
-!pbhydra hard <username>         → Show username's Hard Hydra PB + screenshot
-
-CHIMERA:
-!pbchimera easy <damage>         → Submit Easy Chimera PB (requires screenshot)
-!pbchimera normal <damage>       → Submit Normal Chimera PB (requires screenshot)
-!pbchimera hard <damage>         → Submit Hard Chimera PB (requires screenshot)
-!pbchimera brutal <damage>       → Submit Brutal Chimera PB (requires screenshot)
-!pbchimera nightmare <damage>    → Submit Nightmare Chimera PB (requires screenshot)
-!pbchimera ultra <damage>        → Submit Ultra Nightmare Chimera PB (requires screenshot)
-!pbchimera easy                  → Show your Easy Chimera PB + screenshot
-!pbchimera normal <username>     → Show username's Normal Chimera PB + screenshot
-
-CVC (unchanged):
-!pbcvc <damage>                  → Submit CvC PB (requires screenshot)
-!pbcvc                           → Show your CvC PB + screenshot
-!pbcvc <username>                → Show username's CvC PB + screenshot
-
-🏆 LEADERBOARD COMMANDS (GLOBAL):
---------------------------------
-!top10hydra <difficulty>         → Top 10 Hydra records for specific difficulty
-!top10chimera <difficulty>       → Top 10 Chimera records for specific difficulty
-!top10cvc                        → Top 10 CvC records
-
-⭐ LEADERBOARD COMMANDS (RTF CLAN):
-----------------------------------
-!rtfhydra <difficulty>           → RTF clan Hydra records for specific difficulty
-!rtfchimera <difficulty>         → RTF clan Chimera records for specific difficulty
-!rtfcvc                          → RTF clan CvC records
-
-🔥 LEADERBOARD COMMANDS (RTFC CLAN):
------------------------------------
-!rtfchydra <difficulty>          → RTFC clan Hydra records for specific difficulty
-!rtfcchimera <difficulty>        → RTFC clan Chimera records for specific difficulty
-!rtfccvc                         → RTFC clan CvC records
-
-⚡ LEADERBOARD COMMANDS (RTFR CLAN):
------------------------------------
-!rtfrhydra <difficulty>          → RTFR clan Hydra records for specific difficulty
-!rtfrchimera <difficulty>        → RTFR clan Chimera records for specific difficulty
-!rtfrcvc                         → RTFR clan CvC records
-
-📈 STATS COMMANDS:
------------------
-!mystats                         → Show all your PBs across all bosses and difficulties
-!mystats <username>              → Show all PBs for specified user
-!guide                            → Show user-friendly command list
-
-💡 USAGE EXAMPLES:
------------------
-!pbhydra normal 1500000          → Submit 1.5M damage on Normal Hydra (with screenshot)
-!pbchimera brutal [RTF]Alice     → Shows Alice's Brutal Chimera PB
-!rtfhydra nightmare              → Shows RTF clan's Nightmare Hydra top 10
-
-🏛️ CLAN SYSTEM:
---------------
-Clans are auto-detected from username prefixes:
-- RTF members: [RTF] Username or [RTF]Username
-- RTFC members: [RTFC] Username or [RTFC]Username  
-- RTFR members: [RTFR] Username or [RTFR]Username
-
-🔧 REQUIREMENTS:
----------------
-- Screenshot must be attached when submitting new PBs
-- Only works in authorized channel
-- Supported image formats: PNG, JPG, JPEG, GIF, WEBP
-- Old screenshots are automatically deleted when new PB is set
-"""
-
 import discord
 from discord.ext import commands
 import sqlite3
 import os
 import aiohttp
 from datetime import datetime
+import re
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -137,6 +55,93 @@ BOSS_CONFIG = {
         'difficulties': []  # Pas de difficultés pour CvC
     }
 }
+
+# Mappings pour les diminutifs de difficultés
+DIFFICULTY_SHORTCUTS = {
+    'nm': 'nightmare',
+    'unm': 'ultra'
+}
+
+def parse_damage_amount(damage_str):
+    """Convertit les montants avec suffixes (K, M, B) en nombres entiers"""
+    if not damage_str:
+        return None
+    
+    damage_str = damage_str.strip().upper()
+    
+    # Si c'est déjà un nombre sans suffixe
+    if damage_str.isdigit():
+        return int(damage_str)
+    
+    # Utiliser regex pour extraire le nombre et le suffixe
+    match = re.match(r'^([0-9]*\.?[0-9]+)([KMB]?)$', damage_str)
+    if not match:
+        return None
+    
+    number_str, suffix = match.groups()
+    
+    try:
+        number = float(number_str)
+    except ValueError:
+        return None
+    
+    # Conversion selon le suffixe
+    multipliers = {
+        'K': 1000,
+        'M': 1000000,
+        'B': 1000000000,
+        '': 1
+    }
+    
+    if suffix in multipliers:
+        result = int(number * multipliers[suffix])
+        return result
+    
+    return None
+
+def format_damage_display(damage):
+    """Formate un montant de dégâts avec le suffixe approprié"""
+    if damage == 0:
+        return "0"
+    
+    if damage >= 1000000000:
+        # Milliards
+        billions = damage / 1000000000
+        if billions == int(billions):
+            return f"{int(billions)}B"
+        else:
+            return f"{billions:.1f}B"
+    elif damage >= 1000000:
+        # Millions
+        millions = damage / 1000000
+        if millions == int(millions):
+            return f"{int(millions)}M"
+        else:
+            return f"{millions:.1f}M"
+    elif damage >= 1000:
+        # Milliers
+        thousands = damage / 1000
+        if thousands == int(thousands):
+            return f"{int(thousands)}K"
+        else:
+            return f"{thousands:.1f}K"
+    else:
+        # Moins de 1000
+        return str(damage)
+
+def normalize_difficulty(difficulty):
+    """Normalise une difficulté en gérant les diminutifs"""
+    if not difficulty:
+        return None
+    
+    difficulty_lower = difficulty.lower()
+    
+    # Vérifier les diminutifs d'abord
+    if difficulty_lower in DIFFICULTY_SHORTCUTS:
+        return DIFFICULTY_SHORTCUTS[difficulty_lower]
+    
+    # Sinon retourner tel quel
+    return difficulty_lower
 
 class DatabaseManager:
     def __init__(self, db_path=DATABASE_PATH):
@@ -444,12 +449,13 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
     try:
         # Pour CvC (pas de difficultés)
         if not difficulties:
-            # Utiliser l'ancienne logique pour CvC
-            if arg1 and arg1.isdigit():
-                damage = int(arg1)
-                await handle_pb_submission(ctx, boss_type, None, damage)
-            elif arg1:  # Username
-                await show_user_pb(ctx, boss_type, None, arg1)
+            # Utiliser l'ancienne logique pour CvC avec parsing des montants
+            if arg1:
+                damage = parse_damage_amount(arg1)
+                if damage is not None:
+                    await handle_pb_submission(ctx, boss_type, None, damage)
+                else:  # Username
+                    await show_user_pb(ctx, boss_type, None, arg1)
             else:  # Montrer son propre PB
                 await show_user_pb(ctx, boss_type, None, ctx.author.display_name)
             return
@@ -461,24 +467,30 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
             await ctx.send(
                 f"❌ Please specify difficulty and damage!\n"
                 f"**Available difficulties:** {difficulty_list}\n"
+                f"**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare\n"
                 f"**Examples:**\n"
-                f"`!pb{boss_type} normal 1500000` - Submit PB with screenshot\n"
+                f"`!pb{boss_type} normal 1.5M` - Submit PB with screenshot\n"
+                f"`!pb{boss_type} nm 500K` - Submit Nightmare PB\n"
                 f"`!pb{boss_type} hard` - Show your Hard PB\n"
                 f"`!pb{boss_type} brutal username` - Show user's Brutal PB"
             )
             return
         
+        # Normaliser la difficulté (gérer les diminutifs)
+        normalized_difficulty = normalize_difficulty(arg1)
+        
         # Vérifier si arg1 est une difficulté valide
-        if arg1.lower() in difficulties:
-            difficulty = arg1.lower()
+        if normalized_difficulty in difficulties:
+            difficulty = normalized_difficulty
             
-            if arg2 and arg2.isdigit():
-                # !pbhydra normal 1500000 - Soumission PB
-                damage = int(arg2)
-                await handle_pb_submission(ctx, boss_type, difficulty, damage)
-            elif arg2:
-                # !pbhydra normal username - Voir PB d'un utilisateur
-                await show_user_pb(ctx, boss_type, difficulty, arg2)
+            if arg2:
+                damage = parse_damage_amount(arg2)
+                if damage is not None:
+                    # !pbhydra normal 1.5M - Soumission PB
+                    await handle_pb_submission(ctx, boss_type, difficulty, damage)
+                else:
+                    # !pbhydra normal username - Voir PB d'un utilisateur
+                    await show_user_pb(ctx, boss_type, difficulty, arg2)
             else:
                 # !pbhydra normal - Voir son propre PB
                 await show_user_pb(ctx, boss_type, difficulty, ctx.author.display_name)
@@ -487,11 +499,10 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
             difficulty_list = " | ".join([d.title() for d in difficulties])
             await ctx.send(
                 f"❌ Invalid difficulty: `{arg1}`\n"
-                f"**Available difficulties:** {difficulty_list}"
+                f"**Available difficulties:** {difficulty_list}\n"
+                f"**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare"
             )
             
-    except ValueError:
-        await ctx.send(f"❌ Please provide a valid damage number!")
     except Exception as e:
         await ctx.send(f"❌ Error: {e}")
 
@@ -531,10 +542,10 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
             
             embed = discord.Embed(
                 title=f"🎉 NEW {boss_info['name'].upper()} PB! 🎉",
-                description=f"**{username}** just hit **{damage:,} damage** on {difficulty_name} {boss_info['name']}!",
+                description=f"**{username}** just hit **{format_damage_display(damage)} damage** on {difficulty_name} {boss_info['name']}!",
                 color=0x00ff00
             )
-            embed.add_field(name="📈 Improvement", value=f"+{improvement:,} damage", inline=True)
+            embed.add_field(name="📈 Improvement", value=f"+{format_damage_display(improvement)} damage", inline=True)
             embed.set_image(url=attachment.url)
             
             await ctx.send(embed=embed)
@@ -544,12 +555,12 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
         difficulty_name = get_difficulty_display_name(difficulty) if difficulty else ""
         embed = discord.Embed(
             title="💪 Nice attempt!",
-            description=f"Your damage: **{damage:,}**\nCurrent PB: **{current_pb:,}**",
+            description=f"Your damage: **{format_damage_display(damage)}**\nCurrent PB: **{format_damage_display(current_pb)}**",
             color=0xffa500
         )
         embed.add_field(
             name="Keep going!", 
-            value=f"You need **{current_pb - damage + 1:,}** more damage for a new {difficulty_name} PB!",
+            value=f"You need **{format_damage_display(current_pb - damage + 1)}** more damage for a new {difficulty_name} PB!",
             inline=False
         )
         await ctx.send(embed=embed)
@@ -570,7 +581,7 @@ async def show_user_pb(ctx, boss_type, difficulty, username):
         )
         embed.add_field(
             name="💡 Get started!", 
-            value=f"Use `!pb{boss_type} {difficulty} <damage>` with a screenshot to set your first record!",
+            value=f"Use `!pb{boss_type} {difficulty} <damage>` with a screenshot to set your first record!\nAccepts K/M/B suffixes: `1.5M`, `500K`, etc.",
             inline=False
         )
         await ctx.send(embed=embed)
@@ -578,7 +589,7 @@ async def show_user_pb(ctx, boss_type, difficulty, username):
     
     embed = discord.Embed(
         title=f"{boss_info['emoji']} {username}'s {difficulty_name} {boss_info['name']} PB",
-        description=f"**{pb_damage:,} damage**",
+        description=f"**{format_damage_display(pb_damage)} damage**",
         color=boss_info['color']
     )
     if pb_date:
@@ -619,6 +630,14 @@ async def show_leaderboard(ctx, boss_type, difficulty=None, clan=None):
         return
     
     try:
+        # Normaliser la difficulté si spécifiée
+        if difficulty:
+            difficulty = normalize_difficulty(difficulty)
+            if difficulty not in BOSS_CONFIG[boss_type]['difficulties']:
+                difficulties = " | ".join(BOSS_CONFIG[boss_type]['difficulties'])
+                await ctx.send(f"❌ Invalid difficulty. Available: {difficulties}")
+                return
+        
         boss_info = BOSS_CONFIG[boss_type]
         leaderboard = db_manager.get_leaderboard(boss_type, difficulty, 10, clan)
         
@@ -660,7 +679,7 @@ async def show_leaderboard(ctx, boss_type, difficulty=None, clan=None):
             
             embed.add_field(
                 name=f"{medals[i]} #{i+1} {display_name}",
-                value=f"**{damage:,}** damage{date_text}",
+                value=f"**{format_damage_display(damage)} damage**{date_text}",
                 inline=False
             )
         
@@ -673,20 +692,20 @@ async def show_leaderboard(ctx, boss_type, difficulty=None, clan=None):
 @bot.command()
 async def top10hydra(ctx, difficulty: str = None):
     """Affiche le top 10 des PB Hydra pour une difficulté"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['hydra']['difficulties']:
-        await show_leaderboard(ctx, 'hydra', difficulty.lower())
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['hydra']['difficulties']:
+        await show_leaderboard(ctx, 'hydra', difficulty)
     else:
         difficulties = " | ".join(BOSS_CONFIG['hydra']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!top10hydra <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!top10hydra <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare")
 
 @bot.command()
 async def top10chimera(ctx, difficulty: str = None):
     """Affiche le top 10 des PB Chimera pour une difficulté"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['chimera']['difficulties']:
-        await show_leaderboard(ctx, 'chimera', difficulty.lower())
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['chimera']['difficulties']:
+        await show_leaderboard(ctx, 'chimera', difficulty)
     else:
         difficulties = " | ".join(BOSS_CONFIG['chimera']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!top10chimera <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!top10chimera <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare, `unm` = Ultra")
 
 @bot.command()
 async def top10cvc(ctx):
@@ -697,20 +716,20 @@ async def top10cvc(ctx):
 @bot.command()
 async def rtfhydra(ctx, difficulty: str = None):
     """Affiche le top 10 Hydra du clan RTF"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['hydra']['difficulties']:
-        await show_leaderboard(ctx, 'hydra', difficulty.lower(), 'RTF')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['hydra']['difficulties']:
+        await show_leaderboard(ctx, 'hydra', difficulty, 'RTF')
     else:
         difficulties = " | ".join(BOSS_CONFIG['hydra']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfhydra <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfhydra <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare")
 
 @bot.command()
 async def rtfchimera(ctx, difficulty: str = None):
     """Affiche le top 10 Chimera du clan RTF"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['chimera']['difficulties']:
-        await show_leaderboard(ctx, 'chimera', difficulty.lower(), 'RTF')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['chimera']['difficulties']:
+        await show_leaderboard(ctx, 'chimera', difficulty, 'RTF')
     else:
         difficulties = " | ".join(BOSS_CONFIG['chimera']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfchimera <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfchimera <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare, `unm` = Ultra")
 
 @bot.command()
 async def rtfcvc(ctx):
@@ -721,20 +740,20 @@ async def rtfcvc(ctx):
 @bot.command()
 async def rtfchydra(ctx, difficulty: str = None):
     """Affiche le top 10 Hydra du clan RTFC"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['hydra']['difficulties']:
-        await show_leaderboard(ctx, 'hydra', difficulty.lower(), 'RTFC')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['hydra']['difficulties']:
+        await show_leaderboard(ctx, 'hydra', difficulty, 'RTFC')
     else:
         difficulties = " | ".join(BOSS_CONFIG['hydra']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfchydra <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfchydra <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare")
 
 @bot.command()
 async def rtfcchimera(ctx, difficulty: str = None):
     """Affiche le top 10 Chimera du clan RTFC"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['chimera']['difficulties']:
-        await show_leaderboard(ctx, 'chimera', difficulty.lower(), 'RTFC')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['chimera']['difficulties']:
+        await show_leaderboard(ctx, 'chimera', difficulty, 'RTFC')
     else:
         difficulties = " | ".join(BOSS_CONFIG['chimera']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfcchimera <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfcchimera <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare, `unm` = Ultra")
 
 @bot.command()
 async def rtfccvc(ctx):
@@ -745,20 +764,20 @@ async def rtfccvc(ctx):
 @bot.command()
 async def rtfrhydra(ctx, difficulty: str = None):
     """Affiche le top 10 Hydra du clan RTFR"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['hydra']['difficulties']:
-        await show_leaderboard(ctx, 'hydra', difficulty.lower(), 'RTFR')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['hydra']['difficulties']:
+        await show_leaderboard(ctx, 'hydra', difficulty, 'RTFR')
     else:
         difficulties = " | ".join(BOSS_CONFIG['hydra']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfrhydra <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfrhydra <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare")
 
 @bot.command()
 async def rtfrchimera(ctx, difficulty: str = None):
     """Affiche le top 10 Chimera du clan RTFR"""
-    if difficulty and difficulty.lower() in BOSS_CONFIG['chimera']['difficulties']:
-        await show_leaderboard(ctx, 'chimera', difficulty.lower(), 'RTFR')
+    if difficulty and normalize_difficulty(difficulty) in BOSS_CONFIG['chimera']['difficulties']:
+        await show_leaderboard(ctx, 'chimera', difficulty, 'RTFR')
     else:
         difficulties = " | ".join(BOSS_CONFIG['chimera']['difficulties'])
-        await ctx.send(f"❌ Please specify difficulty: `!rtfrchimera <difficulty>`\n**Available:** {difficulties}")
+        await ctx.send(f"❌ Please specify difficulty: `!rtfrchimera <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare, `unm` = Ultra")
 
 @bot.command()
 async def rtfrcvc(ctx):
@@ -794,7 +813,7 @@ async def mystats(ctx, target_user: str = None):
                 pb_value = user_data[pb_key]
                 pb_date = user_data.get(date_key)
                 date_text = f" • {format_date_only(pb_date)}" if pb_date else ""
-                hydra_stats.append(f"**{difficulty.title()}:** {pb_value:,}{date_text}")
+                hydra_stats.append(f"**{difficulty.title()}:** {format_damage_display(pb_value)}{date_text}")
         
         hydra_text = "\n".join(hydra_stats) if hydra_stats else "No records"
         embed.add_field(name="🐍 Hydra PBs", value=hydra_text, inline=False)
@@ -810,7 +829,7 @@ async def mystats(ctx, target_user: str = None):
                 pb_date = user_data.get(date_key)
                 date_text = f" • {format_date_only(pb_date)}" if pb_date else ""
                 display_name = "Ultra Nightmare" if difficulty == "ultra" else difficulty.title()
-                chimera_stats.append(f"**{display_name}:** {pb_value:,}{date_text}")
+                chimera_stats.append(f"**{display_name}:** {format_damage_display(pb_value)}{date_text}")
         
         chimera_text = "\n".join(chimera_stats) if chimera_stats else "No records"
         embed.add_field(name="🦁 Chimera PBs", value=chimera_text, inline=False)
@@ -818,7 +837,7 @@ async def mystats(ctx, target_user: str = None):
         # CvC
         cvc_pb = user_data.get('pb_cvc', 0)
         cvc_date = user_data.get('pb_cvc_date')
-        cvc_text = f"**{cvc_pb:,} damage**" if cvc_pb > 0 else "No record"
+        cvc_text = f"**{format_damage_display(cvc_pb)} damage**" if cvc_pb > 0 else "No record"
         if cvc_pb > 0 and cvc_date:
             formatted_date = format_date_only(cvc_date)
             if formatted_date:
@@ -833,7 +852,7 @@ async def mystats(ctx, target_user: str = None):
             total_damage += user_data.get(f'pb_chimera_{difficulty}', 0)
         total_damage += user_data.get('pb_cvc', 0)
         
-        embed.add_field(name="💯 Total Combined Damage", value=f"**{total_damage:,}**", inline=False)
+        embed.add_field(name="💯 Total Combined Damage", value=f"**{format_damage_display(total_damage)}**", inline=False)
         
         await ctx.send(embed=embed)
         
@@ -852,10 +871,19 @@ async def guide(ctx):
         color=0x00bfff
     )
     
+    # Info sur les formats de dégâts
+    embed.add_field(
+        name="💰 Damage Formats",
+        value="**Accepted formats:** `1500000`, `1.5M`, `500K`, `2B`\n" +
+              "**Suffixes:** K = thousands, M = millions, B = billions\n" +
+              "**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare",
+        inline=False
+    )
+    
     # Commandes PB Hydra
     embed.add_field(
         name="🐍 Hydra Commands",
-        value="**Difficulties:** Normal | Hard | Brutal | Nightmare\n" +
+        value="**Difficulties:** Normal | Hard | Brutal | Nightmare (nm)\n" +
               "`!pbhydra <difficulty> <damage>` - Submit PB + screenshot\n" +
               "`!pbhydra <difficulty>` - Show your PB\n" +
               "`!pbhydra <difficulty> <user>` - Show user's PB",
@@ -865,7 +893,7 @@ async def guide(ctx):
     # Commandes PB Chimera
     embed.add_field(
         name="🦁 Chimera Commands",
-        value="**Difficulties:** Easy | Normal | Hard | Brutal | Nightmare | Ultra\n" +
+        value="**Difficulties:** Easy | Normal | Hard | Brutal | Nightmare (nm) | Ultra (unm)\n" +
               "`!pbchimera <difficulty> <damage>` - Submit PB + screenshot\n" +
               "`!pbchimera <difficulty>` - Show your PB\n" +
               "`!pbchimera <difficulty> <user>` - Show user's PB",
@@ -911,9 +939,10 @@ async def guide(ctx):
     # Instructions
     embed.add_field(
         name="💡 Examples",
-        value="`!pbhydra brutal 1500000` - Submit Brutal Hydra PB\n" +
-              "`!pbchimera ultra` - Show your Ultra Nightmare PB\n" +
-              "`!rtfhydra nightmare` - RTF clan Nightmare rankings\n" +
+        value="`!pbhydra brutal 1.5M` - Submit Brutal Hydra PB\n" +
+              "`!pbchimera unm 500K` - Submit Ultra Nightmare PB\n" +
+              "`!pbcvc 2.3M` - Submit CvC PB\n" +
+              "`!rtfhydra nm` - RTF clan Nightmare rankings\n" +
               "**Always attach screenshot when submitting PBs!**",
         inline=False
     )
@@ -922,5 +951,5 @@ async def guide(ctx):
     
     await ctx.send(embed=embed)
 
-# TODO: Add your bot token here
-# bot.run("YOUR_DISCORD_TOKEN")
+# Ajout du token bot (à remplacer par votre token)
+# bot.run('YOUR_BOT_TOKEN_HERE')
