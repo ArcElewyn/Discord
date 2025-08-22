@@ -29,31 +29,36 @@ aiohttp>=3.8.0
 Create the following structure on your QNAP:
 
 ```
-/share/Container/discord-bot/
-├── bot.py                  # Script principal minimal
-├── config.py               # Variables centrales (token, channel ID)
-├── requirements.txt        # Dépendances Python
-├── .env                    # Tokens, IDs de channel
-├── docker-compose.yml
-├── bot_data.db             # SQLite DB
-├── cogs/                   # Toutes les commandes du bot
-│   ├── guide.py            # Commande !guide
-│   ├── pbhydra.py          # Commandes PB Hydra
-│   ├── pbchimera.py        # Commandes PB Chimera
-│   ├── pbcvc.py            # Commandes PB CvC
-│   ├── top10.py            # Classements globaux
-│   └── mystats.py          # Commande !mystats
-├── utils/                  # Fonctions utilitaires partagées
-│   ├── DatabaseManager_class.py         # Gestion DB SQLite
-│   ├── ScreenshotManager_class.py       # Gestion des screenshots
-│   ├── leaderboard_handler.py       # Gestion tableau de score
-│   ├── pbhandler.py       # Gestion des pbs
-│   └── helpers.py          # Fonctions génériques (ex: channel autorisé)
-├── logs/                   # Logs du bot (optionnel)
-└── screenshots/            # Screenshots organisés par boss/difficulté
-    ├── hydra/
-    ├── chimera/
-    └── cvc/
+C:.
+|   bot.py                  # Main bot script
+|   config.py               # Configuration (token, channel ID, etc.)
+|   requirements.txt
+|   .env                    # Tokens and IDs
+|   docker-compose.yml
+|   Dockerfile
+|   README.md
+|
++---cogs
+|   ├── guide.py            # Commande !guide
+|   ├── pbhydra.py          # Commands for Hydra PB
+|   ├── pbchimera.py        # Commands for Chimera PB
+|   ├── pbcvc.py            # Commands for CvC PB
+|   ├── top10.py            # Global and clan leaderboards
+|   └── mystats.py          # Command !mystats
+|
++---utils
+|   ├── DatabaseManager_class.py         # SQLite DB manager
+|   ├── ScreenshotManager_class.py       # Screenshot manager
+|   ├── leaderboard_handler.py           # Leaderboard logic
+|   ├── pb_handler.py                    # PB submission logic
+|   └── helpers.py                       # Helper functions
+|
++---screenshots
+|   ├── hydra/
+|   ├── chimera/
+|   └── cvc/
+|
+└── logs/                   # Optional logs folder
 ```
 
 ## 🐳 Docker Installation (Recommended)
