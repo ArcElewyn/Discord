@@ -30,25 +30,29 @@ Create the following structure on your QNAP:
 
 ```
 /share/Container/discord-bot/
-├── bot.py                          # Main bot script
-├── requirements.txt                # Python dependencies
-├── .env                            # Environment variables
-├── docker-compose.yml              # Docker configuration
-├── bot_data.db                     # SQLite database (auto-created)
-├── logs/                           # Bot logs (optional)
-└── screenshots/                    # PB screenshots
+├── bot.py                  # Script principal minimal
+├── config.py               # Variables centrales (token, channel ID)
+├── requirements.txt        # Dépendances Python
+├── .env                    # Tokens, IDs de channel
+├── docker-compose.yml
+├── bot_data.db             # SQLite DB
+├── cogs/                   # Toutes les commandes du bot
+│   ├── guide.py            # Commande !guide
+│   ├── pbhydra.py          # Commandes PB Hydra
+│   ├── pbchimera.py        # Commandes PB Chimera
+│   ├── pbcvc.py            # Commandes PB CvC
+│   ├── top10.py            # Classements globaux
+│   └── mystats.py          # Commande !mystats
+├── utils/                  # Fonctions utilitaires partagées
+│   ├── DatabaseManager_class.py         # Gestion DB SQLite
+│   ├── ScreenshotManager_class.py       # Gestion des screenshots
+│   ├── leaderboard_handler.py       # Gestion tableau de score
+│   ├── pbhandler.py       # Gestion des pbs
+│   └── helpers.py          # Fonctions génériques (ex: channel autorisé)
+├── logs/                   # Logs du bot (optionnel)
+└── screenshots/            # Screenshots organisés par boss/difficulté
     ├── hydra/
-    │   ├── normal/
-    │   ├── hard/
-    │   ├── brutal/
-    │   └── nightmare/
     ├── chimera/
-    │   ├── easy/
-    │   ├── normal/
-    │   ├── hard/
-    │   ├── brutal/
-    │   ├── nightmare/
-    │   └── ultra/
     └── cvc/
 ```
 
