@@ -23,6 +23,7 @@ initial_cogs = [
     "cogs.pbcvc",
     "cogs.top10",
     "cogs.mystats",
+    "cogs.mercy",
 ]
 
 for cog in initial_cogs:
@@ -33,3 +34,4 @@ async def on_ready():
     print(f"{bot.user.name} est connecté !")
 
 bot.run(DISCORD_TOKEN)
+
