@@ -12,5 +12,5 @@ class Pbhydra(commands.Cog):
         """Commande !pbhydra avec gestion des difficultés"""
         await handle_pb_command(ctx, 'hydra', arg1, arg2)
 
-def setup(bot):
-    bot.add_cog(Pbhydra(bot))
+async def setup(bot):
+    await bot.add_cog(Pbhydra(bot))

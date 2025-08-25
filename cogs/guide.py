@@ -22,8 +22,8 @@ class Guide(commands.Cog):
         embed.add_field(
             name="💰 Damage Formats",
             value="**Accepted formats:** `1500000`, `1.5M`, `500K`, `2B`\n" +
-                "**Suffixes:** K = thousands, M = millions, B = billions\n" +
-                "**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare",
+                  "**Suffixes:** K = thousands, M = millions, B = billions\n" +
+                  "**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare",
             inline=False
         )
         
@@ -31,9 +31,9 @@ class Guide(commands.Cog):
         embed.add_field(
             name="🐍 Hydra Commands",
             value="**Difficulties:** Normal | Hard | Brutal | Nightmare (nm)\n" +
-                "`!pbhydra <difficulty> <damage>` - Submit PB + screenshot\n" +
-                "`!pbhydra <difficulty>` - Show your PB\n" +
-                "`!pbhydra <difficulty> <user>` - Show user's PB",
+                  "`!pbhydra <difficulty> <damage>` - Submit PB + screenshot\n" +
+                  "`!pbhydra <difficulty>` - Show your PB\n" +
+                  "`!pbhydra <difficulty> <user>` - Show user's PB",
             inline=False
         )
         
@@ -41,9 +41,9 @@ class Guide(commands.Cog):
         embed.add_field(
             name="🦁 Chimera Commands",
             value="**Difficulties:** Easy | Normal | Hard | Brutal | Nightmare (nm) | Ultra (unm)\n" +
-                "`!pbchimera <difficulty> <damage>` - Submit PB + screenshot\n" +
-                "`!pbchimera <difficulty>` - Show your PB\n" +
-                "`!pbchimera <difficulty> <user>` - Show user's PB",
+                  "`!pbchimera <difficulty> <damage>` - Submit PB + screenshot\n" +
+                  "`!pbchimera <difficulty>` - Show your PB\n" +
+                  "`!pbchimera <difficulty> <user>` - Show user's PB",
             inline=False
         )
         
@@ -51,8 +51,18 @@ class Guide(commands.Cog):
         embed.add_field(
             name="⚔️ CvC Commands",
             value="`!pbcvc <damage>` - Submit PB + screenshot\n" +
-                "`!pbcvc` - Show your PB\n" +
-                "`!pbcvc <username>` - Show user's PB",
+                  "`!pbcvc` - Show your PB\n" +
+                  "`!pbcvc <username>` - Show user's PB",
+            inline=False
+        )
+        
+        # Commandes Mercy
+        embed.add_field(
+            name="🎲 Mercy Commands",
+            value="`!mercy show` - Show your current mercy pulls\n" +
+                  "`!mercy add <nb> <type>` - Add pulls to a shard type\n" +
+                  "`!mercy reset <type>` - Reset pulls for a shard type\n" +
+                  "**Available types:** ancient, void, sacred, primal_legendary, primal_mythical, remnant",
             inline=False
         )
         
@@ -60,8 +70,8 @@ class Guide(commands.Cog):
         embed.add_field(
             name="🌍 Global Leaderboards",
             value="`!top10hydra <difficulty>` - Global Hydra rankings\n" +
-                "`!top10chimera <difficulty>` - Global Chimera rankings\n" +
-                "`!top10cvc` - Global CvC rankings",
+                  "`!top10chimera <difficulty>` - Global Chimera rankings\n" +
+                  "`!top10cvc` - Global CvC rankings",
             inline=False
         )
         
@@ -69,8 +79,8 @@ class Guide(commands.Cog):
         embed.add_field(
             name="🏛️ Clan Leaderboards",
             value="**RTF:** `!rtfhydra <diff>` `!rtfchimera <diff>` `!rtfcvc`\n" +
-                "**RTFC:** `!rtfchydra <diff>` `!rtfcchimera <diff>` `!rtfccvc`\n" +
-                "**RTFR:** `!rtfrhydra <diff>` `!rtfrchimera <diff>` `!rtfrcvc`",
+                  "**RTFC:** `!rtfchydra <diff>` `!rtfcchimera <diff>` `!rtfccvc`\n" +
+                  "**RTFR:** `!rtfrhydra <diff>` `!rtfrchimera <diff>` `!rtfrcvc`",
             inline=False
         )
         
@@ -78,8 +88,8 @@ class Guide(commands.Cog):
         embed.add_field(
             name="📈 Stats & Info",
             value="`!mystats` - View all your PBs\n" +
-                "`!mystats <username>` - View someone's PBs\n" +
-                "`!guide` - Show this help message",
+                  "`!mystats <username>` - View someone's PBs\n" +
+                  "`!guide` - Show this help message",
             inline=False
         )
         
@@ -87,10 +97,12 @@ class Guide(commands.Cog):
         embed.add_field(
             name="💡 Examples",
             value="`!pbhydra brutal 1.5M` - Submit Brutal Hydra PB\n" +
-                "`!pbchimera unm 500K` - Submit Ultra Nightmare PB\n" +
-                "`!pbcvc 2.3M` - Submit CvC PB\n" +
-                "`!rtfhydra nm` - RTF clan Nightmare rankings\n" +
-                "**Always attach screenshot when submitting PBs!**",
+                  "`!pbchimera unm 500K` - Submit Ultra Nightmare PB\n" +
+                  "`!pbcvc 2.3M` - Submit CvC PB\n" +
+                  "`!mercy add 50 ancient` - Add 50 pulls to Ancient shard\n" +
+                  "`!mercy show` - Show your mercy pulls\n" +
+                  "`!rtfhydra nm` - RTF clan Nightmare rankings\n" +
+                  "**Always attach screenshot when submitting PBs!**",
             inline=False
         )
         
@@ -98,5 +110,5 @@ class Guide(commands.Cog):
         
         await ctx.send(embed=embed)
 
-def setup(bot):
-    bot.add_cog(Guide(bot))
+async def setup(bot):
+    await bot.add_cog(Guide(bot))

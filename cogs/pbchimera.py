@@ -12,5 +12,5 @@ class Pbchimera(commands.Cog):
         """Commande !pbchimera avec gestion des difficultés"""
         await handle_pb_command(ctx, 'chimera', arg1, arg2)
 
-def setup(bot):
-    bot.add_cog(Pbchimera(bot))
+async def setup(bot):
+    await bot.add_cog(Pbchimera(bot))

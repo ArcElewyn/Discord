@@ -12,5 +12,5 @@ class Pbcvc(commands.Cog):
         """Commande !pbcvc (sans difficultées)"""
         await handle_pb_command(ctx, 'cvc', target_user)
 
-def setup(bot):
-    bot.add_cog(Pbcvc(bot))
+async def setup(bot):
+    await bot.add_cog(Pbcvc(bot))

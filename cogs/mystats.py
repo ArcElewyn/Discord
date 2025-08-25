@@ -85,5 +85,5 @@ class MyStats(commands.Cog):
 
 
 # Pour charger le Cog
-def setup(bot):
-    bot.add_cog(MyStats(bot))
+async def setup(bot):
+    await bot.add_cog(MyStats(bot))

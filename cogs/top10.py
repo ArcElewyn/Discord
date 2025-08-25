@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
 from utils.leaderboard_handler import show_leaderboard
-from utils.helpers import normalize_difficulty, BOSS_CONFIG
+from utils.helpers import normalize_difficulty
+from config import BOSS_CONFIG
 
 class Top10(commands.Cog):
     """Cog regroupant toutes les commandes de leaderboard globales et par clan"""
@@ -80,5 +81,5 @@ class Top10(commands.Cog):
         else:
             await show_leaderboard(ctx, boss_type, clan=clan)
 
-def setup(bot):
-    bot.add_cog(Top10(bot))
+async def setup(bot):
+    await bot.add_cog(Top10(bot))
