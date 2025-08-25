@@ -88,8 +88,8 @@ class MercyManager:
             return rule["base"]
         return rule["base"] + (pulls - rule["threshold"]) * rule["increment"]
 
-    def get_guaranteed_pull(self, shard_type):
-        """Retourne le pull où la loot est garanti à 100%"""
+    def pulls_until_guaranteed(self, shard_type, pulls):
+        """Retourne combien de pulls restent avant un loot garanti"""
         rules = {
             "ancient": {"start": 200, "increment": 5, "base": 0.5},
             "void": {"start": 200, "increment": 5, "base": 0.5},
@@ -101,4 +101,6 @@ class MercyManager:
         if shard_type not in rules:
             return None
         rule = rules[shard_type]
-        return int(rule["start"] + (100 - rule["base"]) / rule["increment"])
+        guaranteed_pull = int(rule["start"] + (100 - rule["base"]) / rule["increment"])
+        remaining = guaranteed_pull - pulls
+        return remaining if remaining > 0 else 0

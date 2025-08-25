@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from config import AUTHORIZED_CHANNEL_ID
 from utils.MercyManager_class import MercyManager
+from utils.helpers import calc_chance_and_guarantee
 
 VALID_SHARDS = ["ancient", "void", "sacred", "primal", "remnant"]
 
@@ -9,23 +10,6 @@ class Mercy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.mercy_manager = MercyManager()
-
-    def calc_chance_and_guarantee(self, shard_type, pulls):
-        """Calcule la chance actuelle et le pull garanti"""
-        rules = {
-            "ancient": {"start": 200, "increment": 5, "base": 0.5},
-            "void": {"start": 200, "increment": 5, "base": 0.5},
-            "sacred": {"start": 12, "increment": 2, "base": 6},
-            "primal_legendary": {"start": 75, "increment": 1, "base": 1},
-            "primal_mythical": {"start": 200, "increment": 10, "base": 0.5},
-            "remnant": {"start": 24, "increment": 1, "base": 0},
-        }
-        rule = rules[shard_type]
-        chance = rule["base"] if pulls < rule["start"] else rule["base"] + (pulls - rule["start"]) * rule["increment"]
-        guaranteed_at = None
-        if chance >= 100:
-            guaranteed_at = rule["start"] + (100 - rule["base"]) / rule["increment"]
-        return chance, guaranteed_at
 
     @commands.command(name="mercy")
     async def mercy(self, ctx, action: str = None, arg1: str = None, arg2: str = None):

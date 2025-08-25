@@ -99,3 +99,22 @@ def get_difficulty_display_name(difficulty):
 def is_authorized_channel(ctx):
     return ctx.channel.id == AUTHORIZED_CHANNEL_ID
 
+MERCY_RULES = {
+    "ancient": {"start": 200, "increment": 5, "base": 0.5},
+    "void": {"start": 200, "increment": 5, "base": 0.5},
+    "sacred": {"start": 12, "increment": 2, "base": 6},
+    "primal_legendary": {"start": 75, "increment": 1, "base": 1},
+    "primal_mythical": {"start": 200, "increment": 10, "base": 0.5},
+    "remnant": {"start": 24, "increment": 1, "base": 0},
+}
+
+def calc_chance_and_guarantee(shard_type, pulls):
+    """Retourne chance, pull garanti et pulls restants"""
+    if shard_type not in MERCY_RULES:
+        return 0, None, None
+    rule = MERCY_RULES[shard_type]
+    chance = rule["base"] if pulls < rule["start"] else rule["base"] + (pulls - rule["start"]) * rule["increment"]
+    guaranteed_at = int(rule["start"] + (100 - rule["base"]) / rule["increment"])
+    remaining = max(0, guaranteed_at - pulls)
+    return chance, guaranteed_at, remaining
+
