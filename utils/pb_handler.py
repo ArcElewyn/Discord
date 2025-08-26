@@ -13,13 +13,13 @@ db_manager = None
 screenshot_manager = None
 
 def set_managers(db, ss):
-    """Injection des managers (appelée une seule fois depuis bot.py)"""
+    """Injection des managers (appelÃ©e une seule fois depuis bot.py)"""
     global db_manager, screenshot_manager
     db_manager = db
     screenshot_manager = ss
 
 async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
-    """Fonction générique pour gérer toutes les commandes PB avec difficultés"""
+    """Fonction gÃ©nÃ©rique pour gÃ©rer toutes les commandes PB avec difficultÃ©s"""
     if ctx.channel.id != AUTHORIZED_CHANNEL_ID:
         return
     
@@ -27,7 +27,7 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
     difficulties = boss_info['difficulties']
     
     try:
-        # Pour CvC (pas de difficultés)
+        # Pour CvC (pas de difficultÃ©s)
         if not difficulties:
             # Utiliser l'ancienne logique pour CvC avec parsing des montants
             if arg1:
@@ -40,12 +40,12 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
                 await show_user_pb(ctx, boss_type, None, ctx.author.display_name)
             return
         
-        # Pour Hydra et Chimera (avec difficultés)
+        # Pour Hydra et Chimera (avec difficultÃ©s)
         if not arg1:
             # !pbhydra sans arguments - montrer aide
             difficulty_list = " | ".join([d.title() for d in difficulties])
             await ctx.send(
-                f"❌ Please specify difficulty and damage!\n"
+                f"âŒ Please specify difficulty and damage!\n"
                 f"**Available difficulties:** {difficulty_list}\n"
                 f"**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare\n"
                 f"**Examples:**\n"
@@ -56,10 +56,10 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
             )
             return
         
-        # Normaliser la difficulté (gérer les diminutifs)
+        # Normaliser la difficultÃ© (gÃ©rer les diminutifs)
         normalized_difficulty = normalize_difficulty(arg1)
         
-        # Vérifier si arg1 est une difficulté valide
+        # VÃ©rifier si arg1 est une difficultÃ© valide
         if normalized_difficulty in difficulties:
             difficulty = normalized_difficulty
             
@@ -75,26 +75,26 @@ async def handle_pb_command(ctx, boss_type, arg1=None, arg2=None):
                 # !pbhydra normal - Voir son propre PB
                 await show_user_pb(ctx, boss_type, difficulty, ctx.author.display_name)
         else:
-            # arg1 n'est pas une difficulté valide
+            # arg1 n'est pas une difficultÃ© valide
             difficulty_list = " | ".join([d.title() for d in difficulties])
             await ctx.send(
-                f"❌ Invalid difficulty: `{arg1}`\n"
+                f"âŒ Invalid difficulty: `{arg1}`\n"
                 f"**Available difficulties:** {difficulty_list}\n"
                 f"**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare"
             )
             
     except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
+        await ctx.send(f"âŒ Error: {e}")
 
 async def handle_pb_submission(ctx, boss_type, difficulty, damage):
-    """Gère la soumission d'un nouveau PB"""
+    """GÃ¨re la soumission d'un nouveau PB"""
     if not ctx.message.attachments:
-        await ctx.send("❌ Please attach a screenshot to validate your PB!")
+        await ctx.send("âŒ Please attach a screenshot to validate your PB!")
         return
     
     attachment = ctx.message.attachments[0]
     if not any(attachment.filename.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']):
-        await ctx.send("❌ Please attach a valid image file!")
+        await ctx.send("âŒ Please attach a valid image file!")
         return
     
     username = ctx.author.display_name
@@ -107,7 +107,7 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
         )
         
         if screenshot_filename:
-            # Mettre à jour la base et récupérer l'ancien screenshot
+            # Mettre Ã  jour la base et rÃ©cupÃ©rer l'ancien screenshot
             old_screenshot = db_manager.update_user_pb(
                 username, boss_type, damage, screenshot_filename, difficulty
             )
@@ -121,20 +121,20 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
             difficulty_name = get_difficulty_display_name(difficulty) if difficulty else ""
             
             embed = discord.Embed(
-                title=f"🎉 NEW {boss_info['name'].upper()} PB! 🎉",
+                title=f"ðŸŽ‰ NEW {boss_info['name'].upper()} PB! ðŸŽ‰",
                 description=f"**{username}** just hit **{format_damage_display(damage)} damage** on {difficulty_name} {boss_info['name']}!",
                 color=0x00ff00
             )
-            embed.add_field(name="📈 Improvement", value=f"+{format_damage_display(improvement)} damage", inline=True)
+            embed.add_field(name="ðŸ“ˆ Improvement", value=f"+{format_damage_display(improvement)} damage", inline=True)
             embed.set_image(url=attachment.url)
             
             await ctx.send(embed=embed)
         else:
-            await ctx.send("❌ Failed to save screenshot. Please try again.")
+            await ctx.send("âŒ Failed to save screenshot. Please try again.")
     else:
         difficulty_name = get_difficulty_display_name(difficulty) if difficulty else ""
         embed = discord.Embed(
-            title="💪 Nice attempt!",
+            title="ðŸ’ª Nice attempt!",
             description=f"Your damage: **{format_damage_display(damage)}**\nCurrent PB: **{format_damage_display(current_pb)}**",
             color=0xffa500
         )
@@ -161,7 +161,7 @@ async def show_user_pb(ctx, boss_type, difficulty, username):
             color=0x666666
         )
         embed.add_field(
-            name="💡 Get started!", 
+            name="ðŸ’¡ Get started!", 
             value=f"Use `!pb{boss_type} {difficulty} <damage>` with a screenshot to set your first record!\nAccepts K/M/B suffixes: `1.5M`, `500K`, etc.",
             inline=False
         )
@@ -176,7 +176,7 @@ async def show_user_pb(ctx, boss_type, difficulty, username):
     if pb_date:
         formatted_date = format_datetime(pb_date)
         if formatted_date:
-            embed.add_field(name="📅 Record Date", value=formatted_date, inline=False)
+            embed.add_field(name="ðŸ“… Record Date", value=formatted_date, inline=False)
     
     # Envoyer la screenshot si elle existe
     if screenshot_filename:

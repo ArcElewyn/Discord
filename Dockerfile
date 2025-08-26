@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
-COPY bot.py .
+COPY . .
 
 # Create required folders
 RUN mkdir -p screenshots/hydra/normal screenshots/hydra/hard screenshots/hydra/brutal screenshots/hydra/nightmare \

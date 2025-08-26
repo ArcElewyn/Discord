@@ -8,19 +8,19 @@ class Guide(commands.Cog):
 
     @commands.command(name="guide")
     async def guide(self, ctx):
-        """Affiche la liste des commandes disponibles avec les nouvelles difficultés"""
+        """Affiche la liste des commandes disponibles avec les nouvelles difficultÃ©s"""
         if ctx.channel.id != AUTHORIZED_CHANNEL_ID:
             return
         
         embed = discord.Embed(
-            title="🤖 RTF Bot - Commands Guide",
+            title="ðŸ¤– RTF Bot - Commands Guide",
             description="Here are all available commands for tracking your Personal Bests!",
             color=0x00bfff
         )
         
-        # Info sur les formats de dégâts
+        # Info sur les formats de dÃ©gÃ¢ts
         embed.add_field(
-            name="💰 Damage Formats",
+            name="ðŸ’° Damage Formats",
             value="**Accepted formats:** `1500000`, `1.5M`, `500K`, `2B`\n" +
                   "**Suffixes:** K = thousands, M = millions, B = billions\n" +
                   "**Shortcuts:** `nm` = Nightmare, `unm` = Ultra Nightmare",
@@ -29,7 +29,7 @@ class Guide(commands.Cog):
         
         # Commandes PB Hydra
         embed.add_field(
-            name="🐍 Hydra Commands",
+            name="ðŸ Hydra Commands",
             value="**Difficulties:** Normal | Hard | Brutal | Nightmare (nm)\n" +
                   "`!pbhydra <difficulty> <damage>` - Submit PB + screenshot\n" +
                   "`!pbhydra <difficulty>` - Show your PB\n" +
@@ -39,7 +39,7 @@ class Guide(commands.Cog):
         
         # Commandes PB Chimera
         embed.add_field(
-            name="🦁 Chimera Commands",
+            name="ðŸ¦ Chimera Commands",
             value="**Difficulties:** Easy | Normal | Hard | Brutal | Nightmare (nm) | Ultra (unm)\n" +
                   "`!pbchimera <difficulty> <damage>` - Submit PB + screenshot\n" +
                   "`!pbchimera <difficulty>` - Show your PB\n" +
@@ -49,7 +49,7 @@ class Guide(commands.Cog):
         
         # Commandes PB CvC
         embed.add_field(
-            name="⚔️ CvC Commands",
+            name="âš”ï¸ CvC Commands",
             value="`!pbcvc <damage>` - Submit PB + screenshot\n" +
                   "`!pbcvc` - Show your PB\n" +
                   "`!pbcvc <username>` - Show user's PB",
@@ -58,7 +58,7 @@ class Guide(commands.Cog):
         
         # Commandes Mercy
         embed.add_field(
-            name="🎲 Mercy Commands",
+            name="ðŸŽ² Mercy Commands",
             value="`!mercy show` - Show your current mercy pulls\n" +
                   "`!mercy add <nb> <type>` - Add pulls to a shard type\n" +
                   "`!mercy reset <type>` - Reset pulls for a shard type\n" +
@@ -68,7 +68,7 @@ class Guide(commands.Cog):
         
         # Classements globaux
         embed.add_field(
-            name="🌍 Global Leaderboards",
+            name="ðŸŒ Global Leaderboards",
             value="`!top10hydra <difficulty>` - Global Hydra rankings\n" +
                   "`!top10chimera <difficulty>` - Global Chimera rankings\n" +
                   "`!top10cvc` - Global CvC rankings",
@@ -77,7 +77,7 @@ class Guide(commands.Cog):
         
         # Classements par clan
         embed.add_field(
-            name="🏛️ Clan Leaderboards",
+            name="ðŸ›ï¸ Clan Leaderboards",
             value="**RTF:** `!rtfhydra <diff>` `!rtfchimera <diff>` `!rtfcvc`\n" +
                   "**RTFC:** `!rtfchydra <diff>` `!rtfcchimera <diff>` `!rtfccvc`\n" +
                   "**RTFR:** `!rtfrhydra <diff>` `!rtfrchimera <diff>` `!rtfrcvc`",
@@ -86,7 +86,7 @@ class Guide(commands.Cog):
         
         # Stats et aide
         embed.add_field(
-            name="📈 Stats & Info",
+            name="ðŸ“ˆ Stats & Info",
             value="`!mystats` - View all your PBs\n" +
                   "`!mystats <username>` - View someone's PBs\n" +
                   "`!guide` - Show this help message",
@@ -95,7 +95,7 @@ class Guide(commands.Cog):
         
         # Instructions
         embed.add_field(
-            name="💡 Examples",
+            name="ðŸ’¡ Examples",
             value="`!pbhydra brutal 1.5M` - Submit Brutal Hydra PB\n" +
                   "`!pbchimera unm 500K` - Submit Ultra Nightmare PB\n" +
                   "`!pbcvc 2.3M` - Submit CvC PB\n" +
@@ -106,7 +106,7 @@ class Guide(commands.Cog):
             inline=False
         )
         
-        embed.set_footer(text="🎮 Old screenshots are automatically deleted when you set new PBs!")
+        embed.set_footer(text="ðŸŽ® Old screenshots are automatically deleted when you set new PBs!")
         
         await ctx.send(embed=embed)
 

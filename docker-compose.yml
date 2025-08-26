@@ -8,11 +8,11 @@ services:
       - .env
     volumes:
       # Montre le code source pour hot-reload
-      - ./:/app-dev
+      - ./:/app
       # Montre les dossiers de stockage persistants
-      - ./screenshots:/app-dev/screenshots
-      - ./bot_data.db:/app-dev/bot_data.db
-      - ./logs:/app-dev/logs
+      - ./screenshots:/app/screenshots
+      - ./bot_data.db:/app/bot_data.db
+      - ./logs:/app/logs
     environment:
       - TZ=Europe/Paris
     container_name: rtf-discord-bot
