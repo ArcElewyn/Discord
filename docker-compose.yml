@@ -7,11 +7,11 @@ services:
     env_file:
       - .env
     volumes:
-      # Montre le code source pour hot-reload
+      # Monte le code source pour hot-reload
       - ./:/app
-      # Montre les dossiers de stockage persistants
+      # Monte les dossiers de stockage persistants
       - ./screenshots:/app/screenshots
-      - ./bot_data.db:/app/bot_data.db
+      - ./data:/app/data
       - ./logs:/app/logs
     environment:
       - TZ=Europe/Paris

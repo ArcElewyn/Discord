@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from datetime import datetime
 from config import AUTHORIZED_CHANNEL_ID, DIFFICULTY_SHORTCUTS 
@@ -17,7 +18,7 @@ def parse_damage_amount(damage_str):
         number = float(number_str)
     except ValueError:
         return None
-    multipliers = {'K': 1000, 'M': 1_000_000, 'B': 1_000_000_000, '': 1}
+    multipliers = {'K': 1_000, 'M': 1_000_000, 'B': 1_000_000_000, '': 1}
     return int(number * multipliers[suffix])
 
 def format_damage_display(damage):
@@ -37,31 +38,22 @@ def normalize_difficulty(difficulty):
     """Normalise une difficulté en gérant les diminutifs"""
     if not difficulty:
         return None
-    
     difficulty_lower = difficulty.lower()
-    
-    # Vérifier les diminutifs d'abord
     if difficulty_lower in DIFFICULTY_SHORTCUTS:
         return DIFFICULTY_SHORTCUTS[difficulty_lower]
-    
-    # Sinon retourner tel quel
     return difficulty_lower
 
-# Fonctions utilitaires
 def get_user_clan(username):
-    """Détermine le clan d'un utilisateur basé sur son pseudo - Version corrigée"""
+    """Détermine le clan d'un utilisateur basé sur son pseudo"""
     username_upper = username.upper()
-    
-    # Chercher les tags avec crochets et espace
+    # Tags avec crochets et espace
     for clan_tag in ['[RTF] ', '[RTFC] ', '[RTFR] ']:
         if username_upper.startswith(clan_tag):
             return clan_tag.replace('[', '').replace(']', '').strip()
-    
-    # Chercher les tags avec crochets sans espace  
+    # Tags avec crochets sans espace
     for clan_tag in ['[RTF]', '[RTFC]', '[RTFR]']:
         if username_upper.startswith(clan_tag):
             return clan_tag.replace('[', '').replace(']', '')
-    
     return None
 
 def format_datetime(date_str):
@@ -117,4 +109,3 @@ def calc_chance_and_guarantee(shard_type, pulls):
     guaranteed_at = int(rule["start"] + (100 - rule["base"]) / rule["increment"])
     remaining = max(0, guaranteed_at - pulls)
     return chance, guaranteed_at, remaining
-

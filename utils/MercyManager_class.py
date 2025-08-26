@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sqlite3
 from datetime import datetime
 from config import DATABASE_PATH
@@ -18,6 +19,7 @@ class MercyManager:
         self.init_table()
 
     def init_table(self):
+        """Initialise la table des compteurs de mercy"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -33,6 +35,7 @@ class MercyManager:
         conn.close()
 
     def get_pulls(self, user_id, shard_type):
+        """Retourne le nombre de pulls actuels pour un utilisateur et un type de shard"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
@@ -44,24 +47,36 @@ class MercyManager:
         return row[0] if row else 0
 
     def add_pulls(self, user_id, shard_type, pulls):
-        current = self.get_pulls(user_id, shard_type)
+        """Ajoute des pulls pour un utilisateur en gérant correctement l'INSERT/UPDATE"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        if current:
+
+        # Vérifie si l'enregistrement existe
+        cursor.execute(
+            "SELECT pulls FROM mercy_counters WHERE user_id = ? AND shard_type = ?",
+            (user_id, shard_type)
+        )
+        row = cursor.fetchone()
+
+        if row:
+            new_pulls = row[0] + pulls
             cursor.execute(
                 "UPDATE mercy_counters SET pulls = ?, last_reset = ? WHERE user_id = ? AND shard_type = ?",
-                (current + pulls, datetime.utcnow(), user_id, shard_type)
+                (new_pulls, datetime.utcnow(), user_id, shard_type)
             )
         else:
+            new_pulls = pulls
             cursor.execute(
                 "INSERT INTO mercy_counters (user_id, shard_type, pulls, last_reset) VALUES (?, ?, ?, ?)",
-                (user_id, shard_type, pulls, datetime.utcnow())
+                (user_id, shard_type, new_pulls, datetime.utcnow())
             )
+
         conn.commit()
         conn.close()
-        return current + pulls
+        return new_pulls
 
     def reset_pulls(self, user_id, shard_type):
+        """Réinitialise les pulls d'un utilisateur pour un shard"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
@@ -72,6 +87,7 @@ class MercyManager:
         conn.close()
 
     def get_all_pulls(self, user_id):
+        """Retourne tous les pulls d'un utilisateur pour tous les shards"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
@@ -83,6 +99,7 @@ class MercyManager:
         return {shard_type: pulls for shard_type, pulls in rows}
 
     def get_mercy_chance(self, shard_type, pulls):
+        """Calcule la probabilité de mercy selon le nombre de pulls"""
         rule = MERCY_RULES[shard_type]
         if pulls <= rule["threshold"]:
             return rule["base"]

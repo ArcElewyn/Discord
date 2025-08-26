@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sqlite3, os
 import aiohttp
 from datetime import datetime
@@ -33,13 +34,14 @@ class ScreenshotManager:
             async with aiohttp.ClientSession() as session:
                 async with session.get(attachment.url) as resp:
                     if resp.status == 200:
+                        # Ouverture en binaire, pas de problème d'encodage
                         with open(filepath, 'wb') as f:
                             f.write(await resp.read())
                         return filename
             return None
             
         except Exception as e:
-            print(f"Erreur sauvegarde screenshot: {e}")
+            print(f"Erreur sauvegarde screenshot: {str(e)}")
             return None
     
     def get_screenshot_path(self, filename, boss_type, difficulty=None):
@@ -60,4 +62,4 @@ class ScreenshotManager:
                     os.remove(old_path)
                     print(f"Ancien screenshot supprimé: {filename}")
                 except Exception as e:
-                    print(f"Erreur suppression screenshot: {e}")
+                    print(f"Erreur suppression screenshot: {str(e)}")

@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import discord
 from discord.ext import commands
-from config import AUTHORIZED_CHANNEL_ID
 from utils.pb_handler import handle_pb_command
 
 class Pbchimera(commands.Cog):
+    """Cog pour gérer les Personal Bests Chimera"""
+
     def __init__(self, bot):
         self.bot = bot
 

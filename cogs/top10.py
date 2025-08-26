@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import discord
 from discord.ext import commands
 from utils.leaderboard_handler import show_leaderboard
@@ -77,7 +78,11 @@ class Top10(commands.Cog):
             await show_leaderboard(ctx, boss_type, difficulty, clan)
         elif boss_type != 'cvc':  # CvC n’a pas de difficultés
             difficulties = " | ".join(BOSS_CONFIG[boss_type]['difficulties'])
-            await ctx.send(f"❌ Please specify difficulty: `!{ctx.command.name} <difficulty>`\n**Available:** {difficulties}\n**Shortcuts:** `nm` = Nightmare, `unm` = Ultra")
+            await ctx.send(
+                f"❌ Please specify difficulty: `!{ctx.command.name} <difficulty>`\n"
+                f"**Available:** {difficulties}\n"
+                f"**Shortcuts:** `nm` = Nightmare, `unm` = Ultra"
+            )
         else:
             await show_leaderboard(ctx, boss_type, clan=clan)
 

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from config import DATABASE_PATH
 import sqlite3, os
+
 class DatabaseManager:
     def __init__(self, db_path=DATABASE_PATH):
         self.db_path = db_path
@@ -51,7 +53,7 @@ class DatabaseManager:
             pb_chimera_ultra_screenshot TEXT,
             pb_chimera_ultra_date TIMESTAMP,
             
-            -- CvC (unchanged)
+            -- CvC (inchangé)
             pb_cvc INTEGER DEFAULT 0,
             pb_cvc_screenshot TEXT,
             pb_cvc_date TIMESTAMP,
@@ -170,11 +172,10 @@ class DatabaseManager:
         # Récupérer toutes les colonnes de PB
         cursor.execute('SELECT * FROM users WHERE discord_username = ?', (username.lower(),))
         result = cursor.fetchone()
+        columns = [desc[0] for desc in cursor.description]
         conn.close()
         
         if not result:
             return None
-            
-        # Convertir en dictionnaire pour faciliter l'accès
-        columns = [desc[0] for desc in cursor.description]
-        return dict(zip(columns, result)) if result else None
+        
+        return dict(zip(columns, result))
