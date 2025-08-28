@@ -28,13 +28,12 @@ jobs:
           cd $DEPLOY_PATH
           if [ ! -d ".git" ]; then
             git init
-            git remote add origin https://x-access-token:$GITHUB_TOKEN@github.com/ArcElewyn/Discord.git
-            git fetch origin $GITHUB_REF_NAME
-            git reset --hard origin/$GITHUB_REF_NAME
           else
-            git fetch origin $GITHUB_REF_NAME
-            git reset --hard origin/$GITHUB_REF_NAME
+            git remote remove origin || true
           fi
+          git remote add origin https://x-access-token:$GITHUB_TOKEN@github.com/ArcElewyn/Discord.git
+          git fetch origin $GITHUB_REF_NAME
+          git reset --hard origin/$GITHUB_REF_NAME
 
       - name: Restart bot
         run: |
