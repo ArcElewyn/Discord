@@ -22,7 +22,7 @@ class MyStats(commands.Cog):
             user_data = db_manager.get_user_all_pbs(username)
 
             if not user_data:
-                await ctx.send(f"❌ No data found for **{username}**.")
+                await ctx.send(f"❌ No data found for **{ctx.author.display_name}**.")
                 return
 
             embed = discord.Embed(
