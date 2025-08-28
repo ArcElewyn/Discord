@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import discord
+import os
+import sys
 from discord.ext import commands
 from config import DISCORD_TOKEN
 
@@ -8,6 +10,11 @@ from utils.ScreenshotManager_class import ScreenshotManager
 from utils.MercyManager_class import MercyManager
 from utils.pb_handler import set_managers
 from utils.leaderboard_handler import set_db_manager
+
+# Force UTF-8
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+sys.stdout.reconfigure(encoding='utf-8')
 
 # Définir les intents
 intents = discord.Intents.default()
