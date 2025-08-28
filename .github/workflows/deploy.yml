@@ -15,7 +15,7 @@ jobs:
         id: set-path
         run: |
           if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "DEPLOY_PATH=//share/discord-bot-dev" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/share/discord-bot-dev" >> $GITHUB_ENV
           elif [ "${GITHUB_REF_NAME}" = "dev" ]; then
             echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-prod" >> $GITHUB_ENV
           else
