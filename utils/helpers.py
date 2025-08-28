@@ -45,6 +45,8 @@ def normalize_difficulty(difficulty):
 
 def get_user_clan(username):
     """Détermine le clan d'un utilisateur basé sur son pseudo"""
+    if not username:
+        return None
     username_upper = username.upper()
     # Tags avec crochets et espace
     for clan_tag in ['[RTF] ', '[RTFC] ', '[RTFR] ']:
@@ -55,6 +57,10 @@ def get_user_clan(username):
         if username_upper.startswith(clan_tag):
             return clan_tag.replace('[', '').replace(']', '')
     return None
+
+def get_user_clan_from_ctx(ctx):
+    """Détermine le clan d'un utilisateur depuis le contexte Discord"""
+    return get_user_clan(ctx.author.display_name)
 
 def format_datetime(date_str):
     """Formate une date en format AM/PM"""

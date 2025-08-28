@@ -90,8 +90,9 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
         await ctx.send("⚠️ Please attach a valid image file!")
         return
     
+    user_id = ctx.author.id
     username = ctx.author.display_name
-    current_pb, _, _ = db_manager.get_user_pb(username, boss_type, difficulty)
+    current_pb, _, _ = db_manager.get_user_pb(user_id, boss_type, difficulty)
     
     if damage > current_pb:
         screenshot_filename = await screenshot_manager.save_screenshot(
@@ -100,7 +101,7 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
         
         if screenshot_filename:
             old_screenshot = db_manager.update_user_pb(
-                username, boss_type, damage, screenshot_filename, difficulty
+                user_id, username, boss_type, damage, screenshot_filename, difficulty
             )
             
             if old_screenshot:
@@ -133,13 +134,35 @@ async def handle_pb_submission(ctx, boss_type, difficulty, damage):
 
 async def show_user_pb(ctx, boss_type, difficulty, target_user):
     """Affiche le PB actuel d'un utilisateur"""
-    current_pb, screenshot, date = db_manager.get_user_pb(target_user, boss_type, difficulty)
+    # Si target_user est un nom d'utilisateur, on essaie de le trouver
+    if isinstance(target_user, str) and not target_user.isdigit():
+        # D'abord, vérifier si c'est l'utilisateur actuel
+        if target_user.lower() == ctx.author.display_name.lower():
+            user_id = ctx.author.id
+            display_name = ctx.author.display_name
+        else:
+            # Chercher dans la base de données
+            matches = db_manager.find_user_by_name(target_user)
+            if not matches:
+                await ctx.send(f"⚠️ User **{target_user}** not found in database.")
+                return
+            elif len(matches) > 1:
+                await ctx.send(f"⚠️ Multiple users found for **{target_user}**. Please be more specific.")
+                return
+            else:
+                user_id, display_name = matches[0]
+    else:
+        # Si c'est l'utilisateur actuel
+        user_id = ctx.author.id
+        display_name = ctx.author.display_name
+    
+    current_pb, screenshot, date = db_manager.get_user_pb(user_id, boss_type, difficulty)
     boss_info = BOSS_CONFIG[boss_type]
     difficulty_name = get_difficulty_display_name(difficulty) if difficulty else ""
     
     if current_pb > 0:
         embed = discord.Embed(
-            title=f"📊 {target_user}'s {difficulty_name} {boss_info['name']} PB",
+            title=f"📊 {display_name}'s {difficulty_name} {boss_info['name']} PB",
             description=f"**{format_damage_display(current_pb)} damage**",
             color=0x00bfff
         )
@@ -157,4 +180,4 @@ async def show_user_pb(ctx, boss_type, difficulty, target_user):
 
         await ctx.send(embed=embed)
     else:
-        await ctx.send(f"⚠️ No PB found for **{target_user}** on {difficulty_name} {boss_info['name']}.")
+        await ctx.send(f"⚠️ No PB found for **{display_name}** on {difficulty_name} {boss_info['name']}.")

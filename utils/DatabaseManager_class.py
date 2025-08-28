@@ -17,7 +17,8 @@ class DatabaseManager:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            discord_username TEXT UNIQUE,
+            discord_id TEXT UNIQUE,
+            discord_username TEXT,
             
             -- Hydra difficulties
             pb_hydra_normal INTEGER DEFAULT 0,
@@ -63,10 +64,19 @@ class DatabaseManager:
         )
         ''')
         
+        # Migration des données existantes (si nécessaire)
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [row[1] for row in cursor.fetchall()]
+        
+        if 'discord_id' not in columns:
+            cursor.execute('ALTER TABLE users ADD COLUMN discord_id TEXT')
+            # Note: Vous devrez peut-être faire une migration manuelle pour les données existantes
+        
         # Table pour l'historique global
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS pb_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            discord_id TEXT,
             username TEXT,
             boss_type TEXT,
             difficulty TEXT,
@@ -79,7 +89,7 @@ class DatabaseManager:
         conn.commit()
         conn.close()
     
-    def get_user_pb(self, username, boss_type, difficulty=None):
+    def get_user_pb(self, user_id, boss_type, difficulty=None):
         """Récupère le PB d'un utilisateur pour un boss et difficulté spécifique"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -90,21 +100,21 @@ class DatabaseManager:
             column_prefix = f"pb_{boss_type}"
             
         cursor.execute(
-            f"SELECT {column_prefix}, {column_prefix}_screenshot, {column_prefix}_date FROM users WHERE discord_username = ?",
-            (username.lower(),)
+            f"SELECT {column_prefix}, {column_prefix}_screenshot, {column_prefix}_date FROM users WHERE discord_id = ?",
+            (str(user_id),)
         )
         result = cursor.fetchone()
         conn.close()
         
         return result if result else (0, None, None)
     
-    def update_user_pb(self, username, boss_type, damage, screenshot_filename, difficulty=None):
+    def update_user_pb(self, user_id, username, boss_type, damage, screenshot_filename, difficulty=None):
         """Met à jour le PB d'un utilisateur et supprime l'ancien screenshot"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
         # Récupérer l'ancien screenshot pour le supprimer
-        old_data = self.get_user_pb(username, boss_type, difficulty)
+        old_data = self.get_user_pb(user_id, boss_type, difficulty)
         old_screenshot = old_data[1] if old_data else None
         
         if difficulty:
@@ -114,21 +124,22 @@ class DatabaseManager:
         
         # Créer l'utilisateur s'il n'existe pas, sinon mettre à jour
         cursor.execute(f'''
-        INSERT INTO users (discord_username, {column_prefix}, {column_prefix}_screenshot, {column_prefix}_date, total_attempts)
-        VALUES (?, ?, ?, CURRENT_TIMESTAMP, 1)
-        ON CONFLICT(discord_username) 
+        INSERT INTO users (discord_id, discord_username, {column_prefix}, {column_prefix}_screenshot, {column_prefix}_date, total_attempts)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, 1)
+        ON CONFLICT(discord_id) 
         DO UPDATE SET 
+            discord_username = ?,
             {column_prefix} = ?,
             {column_prefix}_screenshot = ?,
             {column_prefix}_date = CURRENT_TIMESTAMP,
             total_attempts = total_attempts + 1
-        ''', (username.lower(), damage, screenshot_filename, damage, screenshot_filename))
+        ''', (str(user_id), username, damage, screenshot_filename, username, damage, screenshot_filename))
         
         # Ajouter à l'historique
         cursor.execute('''
-        INSERT INTO pb_history (username, boss_type, difficulty, damage, screenshot_filename)
-        VALUES (?, ?, ?, ?, ?)
-        ''', (username.lower(), boss_type, difficulty or 'none', damage, screenshot_filename))
+        INSERT INTO pb_history (discord_id, username, boss_type, difficulty, damage, screenshot_filename)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''', (str(user_id), username, boss_type, difficulty or 'none', damage, screenshot_filename))
         
         conn.commit()
         conn.close()
@@ -164,13 +175,13 @@ class DatabaseManager:
         conn.close()
         return results
     
-    def get_user_all_pbs(self, username):
+    def get_user_all_pbs(self, user_id):
         """Récupère tous les PB d'un utilisateur"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
         # Récupérer toutes les colonnes de PB
-        cursor.execute('SELECT * FROM users WHERE discord_username = ?', (username.lower(),))
+        cursor.execute('SELECT * FROM users WHERE discord_id = ?', (str(user_id),))
         result = cursor.fetchone()
         columns = [desc[0] for desc in cursor.description]
         conn.close()
@@ -179,3 +190,14 @@ class DatabaseManager:
             return None
         
         return dict(zip(columns, result))
+    
+    def find_user_by_name(self, username):
+        """Trouve un utilisateur par son nom (pour rétrocompatibilité)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT discord_id, discord_username FROM users WHERE discord_username LIKE ?', (f'%{username}%',))
+        results = cursor.fetchall()
+        conn.close()
+        
+        return results
