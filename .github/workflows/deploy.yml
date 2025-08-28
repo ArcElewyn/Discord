@@ -22,10 +22,13 @@ jobs:
 
       - name: Update bot files
         run: |
-          if [ ! -d "$DEPLOY_PATH/.git" ]; then
-            git clone -b $GITHUB_REF_NAME https://github.com/ArcElewyn/Discord.git $DEPLOY_PATH
+          cd $DEPLOY_PATH
+          if [ ! -d ".git" ]; then
+            git init
+            git remote add origin https://github.com/ArcElewyn/Discord.git
+            git fetch origin $GITHUB_REF_NAME
+            git reset --hard origin/$GITHUB_REF_NAME
           else
-            cd $DEPLOY_PATH
             git fetch origin $GITHUB_REF_NAME
             git reset --hard origin/$GITHUB_REF_NAME
           fi
