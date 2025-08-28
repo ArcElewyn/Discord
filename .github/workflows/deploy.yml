@@ -8,25 +8,35 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
       - name: Set deployment path
         id: set-path
         run: |
           if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "DEPLOY_PATH=/share/discord-bot-dev" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/share/discord-bot-prod" >> $GITHUB_ENV
           elif [ "${GITHUB_REF_NAME}" = "dev" ]; then
-            echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-prod" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/share/discord-bot-dev" >> $GITHUB_ENV
           else
             echo "Unsupported branch"
             exit 1
           fi
 
-      - name: Deploy bot
+      - name: Update bot files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config --global --add safe.directory $DEPLOY_PATH
           cd $DEPLOY_PATH
+          if [ ! -d ".git" ]; then
+            git init
+          else
+            git remote remove origin || true
+          fi
+          git remote add origin https://x-access-token:$GITHUB_TOKEN@github.com/ArcElewyn/Discord.git
           git fetch origin $GITHUB_REF_NAME
           git reset --hard origin/$GITHUB_REF_NAME
+
+      - name: Restart bot
+        run: |
+          cd $DEPLOY_PATH
           docker compose down || true
           docker compose up --build -d
