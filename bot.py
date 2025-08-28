@@ -40,6 +40,25 @@ initial_cogs = [
     "cogs.mercy",
 ]
 
+# Liste des dossiers
+folders = [
+    "screenshots/hydra/normal",
+    "screenshots/hydra/hard",
+    "screenshots/hydra/brutal",
+    "screenshots/hydra/nightmare",
+    "screenshots/chimera/easy",
+    "screenshots/chimera/normal",
+    "screenshots/chimera/hard",
+    "screenshots/chimera/brutal",
+    "screenshots/chimera/nightmare",
+    "screenshots/chimera/ultra",
+    "screenshots/cvc",
+]
+
+# Création des dossiers si nécessaire (exist_ok=True évite d'écraser)
+for f in folders:
+    os.makedirs(f, exist_ok=True)
+
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)

@@ -14,11 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY . .
 
-# Create required folders
-RUN mkdir -p screenshots/hydra/normal screenshots/hydra/hard screenshots/hydra/brutal screenshots/hydra/nightmare \
-    screenshots/chimera/easy screenshots/chimera/normal screenshots/chimera/hard screenshots/chimera/brutal screenshots/chimera/nightmare screenshots/chimera/ultra \
-    screenshots/cvc
-
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 
