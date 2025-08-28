@@ -8,15 +8,17 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
- run: |
-  if [ "${GITHUB_REF_NAME}" = "main" ]; then
-    echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-prod" >> $GITHUB_ENV
-  elif [ "${GITHUB_REF_NAME}" = "dev" ]; then
-    echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-dev" >> $GITHUB_ENV
-  else
-    echo "Unsupported branch"
-    exit 1
-  fi
+      - name: Set deployment path
+        id: set-path
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-prod" >> $GITHUB_ENV
+          elif [ "${GITHUB_REF_NAME}" = "dev" ]; then
+            echo "DEPLOY_PATH=/share/CACHEDEV1_DATA/discord-bot-dev" >> $GITHUB_ENV
+          else
+            echo "Unsupported branch"
+            exit 1
+          fi
 
       - name: Update bot files
         env:
