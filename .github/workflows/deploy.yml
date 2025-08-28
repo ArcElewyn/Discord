@@ -38,5 +38,5 @@ jobs:
       - name: Restart bot
         run: |
           cd $DEPLOY_PATH
-          docker compose down || true
-          docker compose up --build -d
+          docker compose -f $DEPLOY_PATH/docker-compose.yml down || true
+          docker compose -f $DEPLOY_PATH/docker-compose.yml up --build -d
