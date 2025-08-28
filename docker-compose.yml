@@ -15,10 +15,11 @@ services:
       - ./logs:/app/logs
     environment:
       - TZ=Europe/Paris
-    container_name: rtf-discord-bot
+    container_name: rtf-discord-bot-dev
     deploy:
       resources:
         limits:
           memory: 256M
         reservations:
           memory: 128M
+
