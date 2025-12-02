@@ -38,6 +38,7 @@ initial_cogs = [
     "cogs.top10",
     "cogs.mystats",
     "cogs.mercy",
+    "cogs.channelplanner",
 ]
 
 # Liste des dossiers
@@ -79,3 +80,4 @@ class MyBot(commands.Bot):
 
 bot = MyBot()
 bot.run(DISCORD_TOKEN)
+
